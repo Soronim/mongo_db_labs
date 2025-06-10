@@ -16,7 +16,8 @@ module.exports = {
             },
             release_date: {
               bsonType: "date",
-              description: "Дата выпуска игры"
+              description: "Дата выпуска игры, не может быть в будущем",
+              maximum: new Date() // Устанавливаем максимальную дату как текущую
             }
           }
         }
@@ -28,7 +29,9 @@ module.exports = {
       { unique: true, collation: { locale: "en", strength: 2 } }
     );
 
-    await db.collection("game_pages").insertMany([
+    // Проверяем, что все даты выпуска не в будущем
+    const currentDate = new Date();
+    const testGames = [
       { title: "The Witcher 3", description: "Ролевая игра в открытом мире", release_date: new Date("2015-05-19") },
       { title: "Cyberpunk 2077", description: "Футуристическая RPG", release_date: new Date("2020-12-10") },
       { title: "Red Dead Redemption 2", description: "Приключенческий вестерн", release_date: new Date("2018-10-26") },
@@ -39,7 +42,14 @@ module.exports = {
       { title: "Genshin Impact", description: "Игра с открытым миром", release_date: new Date("2020-09-28") },
       { title: "Minecraft", description: "Песочница с кубической графикой", release_date: new Date("2011-11-18") },
       { title: "Among Us", description: "Мультиплеерная социальная игра", release_date: new Date("2018-06-15") }
-    ]);
+    ];
+
+    // Фильтруем игры, оставляя только те, у которых дата выпуска не в будущем
+    const validGames = testGames.filter(game => game.release_date <= currentDate);
+    
+    if (validGames.length > 0) {
+      await db.collection("game_pages").insertMany(validGames);
+    }
   },
 
   async down(db, client) {
