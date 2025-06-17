@@ -15,48 +15,37 @@ module.exports = {
               bsonType: "string",
               minLength: 3,
               maxLength: 30,
-              pattern: "^[a-zA-Zа-яА-Я0-9_]+$", // Добавлены русские буквы
-              description: "Уникальное имя пользователя (буквы, цифры и подчеркивание)"
+              pattern: "^[a-zA-Zа-яА-Я0-9_]+$",
+              description: "Уникальное имя пользователя"
             },
             email: {
               bsonType: "string",
               pattern: "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-              description: "Электронная почта пользователя"
+              description: "Электронная почта"
             },
             password: {
               bsonType: "string",
               minLength: 8,
               pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?])[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]{8,}$",
-              description: "Пароль должен содержать минимум 8 символов, включая заглавные и строчные буквы, цифры и специальные символы"
+              description: "Пароль с спецсимволами"
             }
           }
         }
       }
     });
 
-    // Создаем индексы с collation для регистронезависимости
-    await db.collection("users").createIndex(
-      { email: 1 }, 
-      { 
-        unique: true,
-        collation: {
-          locale: 'en',
-          strength: 2
-        }
-      }
-    );
+    // Создаем индексы
+    await db.collection("users").createIndex({ email: 1 }, { 
+      unique: true,
+      collation: { locale: 'en', strength: 2 }
+    });
     
-    await db.collection("users").createIndex(
-      { nickname: 1 }, 
-      { 
-        unique: true,
-        collation: {
-          locale: 'en',
-          strength: 2
-        }
-      }
-    );
+    await db.collection("users").createIndex({ nickname: 1 }, { 
+      unique: true,
+      collation: { locale: 'en', strength: 2 }
+    });
 
+    
     await db.collection("users").insertMany([
       { nickname: "ivan123", email: "ivan@example.com", password: "Password123!" },
       { nickname: "petr_the_great", email: "petr@example.com", password: "SecurePass#2023" },
@@ -71,11 +60,6 @@ module.exports = {
     ]);
   },
 
-  /**
-   * @param db {import('mongodb').Db}
-   * @param client {import('mongodb').MongoClient}
-   * @returns {Promise<void>}
-   */
   async down(db, client) {
     await db.collection("users").drop();
   }
